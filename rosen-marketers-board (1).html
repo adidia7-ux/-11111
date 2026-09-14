@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>רוזן סוכנות ביטוח — לוח סגירות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@600;700&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #16233E;
+    --navy-deep: #0E1830;
+    --paper: #EFEDE6;
+    --card: #F8F6F1;
+    --ink: #1B2430;
+    --brass: #B98B3E;
+    --green: #2F6F4E;
+    --line: #DCD8CC;
+    --muted: #7A7F87;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Heebo', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(180deg, var(--navy), var(--navy-deep));
+    padding: 16px 18px;
+    border-bottom: 3px solid var(--brass);
+    max-width: 620px;
+    margin: 0 auto;
+  }
+  .seal {
+    width: 38px; height: 38px; min-width: 38px;
+    border-radius: 50%;
+    border: 1.5px solid var(--brass);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 18px; font-weight: 700; color: var(--brass);
+  }
+  .brand { font-family: 'Frank Ruhl Libre', serif; font-size: 18px; font-weight: 700; color: #F6F3EC; }
+  .sub { font-size: 12px; color: #B9BDC8; margin-top: 2px; }
+  .content { max-width: 620px; margin: 0 auto; padding: 18px 18px 0; }
+  .add-row { display: flex; gap: 8px; margin-bottom: 20px; }
+  input[type=text] {
+    flex: 1; border: 1px solid var(--line); background: #fff;
+    border-radius: 6px; padding: 10px 12px; font-size: 14px;
+    font-family: 'Heebo', sans-serif; color: var(--ink); outline: none; min-width: 0;
+  }
+  .btn-gold {
+    display: flex; align-items: center; gap: 5px;
+    background: var(--brass); color: #20140A; border: none;
+    border-radius: 6px; padding: 10px 15px; font-size: 13.5px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; font-family: 'Heebo', sans-serif;
+  }
+  .table { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
+  .empty { color: var(--muted); font-size: 13.5px; padding: 16px 2px; }
+  .row-card { background: var(--card); border: 1px solid var(--line); border-radius: 5px; padding: 12px 14px; }
+  .row-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+  .row-name { font-size: 15px; font-weight: 700; color: var(--navy); font-family: 'Frank Ruhl Libre', serif; }
+  .remove-marketer { background: transparent; border: none; color: var(--muted); cursor: pointer; padding: 4px; display: flex; }
+  .checks-row { display: flex; flex-wrap: wrap; gap: 7px; }
+  .checked-box, .add-box {
+    width: 28px; height: 28px; min-width: 28px; border-radius: 5px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+  }
+  .checked-box { border: 1.5px solid var(--green); background: var(--green); }
+  .add-box { border: 1.5px dashed var(--brass); background: transparent; }
+  .feed-title { font-family: 'Frank Ruhl Libre', serif; font-size: 15.5px; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+  .feed-list { display: flex; flex-direction: column; gap: 6px; }
+  .feed-row { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 5px; padding: 9px 13px; }
+  .feed-dot { width: 7px; height: 7px; min-width: 7px; border-radius: 50%; background: var(--green); }
+  .feed-text { font-size: 13.5px; flex: 1; }
+  .feed-time { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+  .toast {
+    max-width: 620px; margin: 14px auto 0; background: var(--navy-deep); color: #F6F3EC;
+    padding: 11px 15px; border-radius: 6px; display: flex; align-items: center; gap: 9px;
+    font-size: 13px; border: 1px solid var(--brass);
+    opacity: 0; transform: translateY(-6px); transition: all .25s ease;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .note {
+    max-width: 620px; margin: 0 auto; padding: 0 18px; font-size: 11.5px; color: var(--muted);
+    line-height: 1.6; margin-top: 24px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="seal">ר</div>
+    <div style="flex:1">
+      <div class="brand">רוזן סוכנות ביטוח</div>
+      <div class="sub" id="subLine">לוח סגירות</div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <div class="content">
+    <div class="add-row">
+      <input type="text" id="nameInput" placeholder="הוספת משווק/ת חדש/ה…" />
+      <button class="btn-gold" onclick="addMarketer()">+ הוסף</button>
+    </div>
+
+    <div class="table" id="table"></div>
+
+    <div id="feedWrap"></div>
+  </div>
+
+  <div class="note">
+    בכל סימון וי נשלחת התראה במייל למנהלת (דרך Make) — זה עובד בכל מכשיר ובכל דפדפן, גם בלי לשתף אחסון.<br/>
+    עם זאת, הלוח עצמו (רשימת המשווקים והריבועים המסומנים) נשמר בדפדפן הזה בלבד (אחסון מקומי) ומתעדכן אוטומטית
+    בין כרטיסיות פתוחות באותו דפדפן/מכשיר — אך לא מסתנכרן בין מכשירים שונים. אם תרצה שגם התצוגה עצמה
+    תהיה משותפת בזמן אמת בין כל המכשירים, אפשר להוסיף חיבור ל‑Firebase או שירות דומה בהמשך.
+  </div>
+
+<script>
+  const STORAGE_KEY = 'rosen-marketers-board';
+  const MAKE_WEBHOOK_URL = 'https://hook.eu2.make.com/2s9ih42xxjit9yi7o69rao2gdfssa9nt';
+  let marketers = [];
+  let knownCheckIds = new Set();
+  let firstLoad = true;
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  function timeAgo(ts) {
+    const diff = Math.max(0, Date.now() - ts);
+    const s = Math.floor(diff / 1000);
+    if (s < 10) return 'ממש עכשיו';
+    if (s < 60) return `לפני ${s} שנ'`;
+    const m = Math.floor(s / 60);
+    if (m < 60) return `לפני ${m} דק'`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `לפני ${h} שע'`;
+    return `לפני ${Math.floor(h / 24)} ימים`;
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function save(next) {
+    marketers = next;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    render();
+  }
+
+  function addMarketer() {
+    const input = document.getElementById('nameInput');
+    const name = input.value.trim();
+    if (!name) return;
+    if (marketers.some(m => m.name === name)) { input.value = ''; return; }
+    const next = [...marketers, { id: uid(), name, checks: [] }];
+    input.value = '';
+    save(next);
+  }
+
+  function removeMarketer(id) {
+    save(marketers.filter(m => m.id !== id));
+  }
+
+  function addCheck(marketerId) {
+    const check = { id: uid(), at: Date.now() };
+    knownCheckIds.add(check.id);
+    const marketer = marketers.find(m => m.id === marketerId);
+    const next = marketers.map(m =>
+      m.id === marketerId ? { ...m, checks: [...m.checks, check] } : m
+    );
+    save(next);
+    notifyMake(marketer ? marketer.name : '', check.at);
+  }
+
+  function notifyMake(marketerName, at) {
+    if (!MAKE_WEBHOOK_URL || MAKE_WEBHOOK_URL.indexOf('YOUR-WEBHOOK') !== -1) return;
+    // Sent as application/x-www-form-urlencoded (a browser "simple request") so no CORS
+    // preflight (OPTIONS) is required — a JSON body would trigger a preflight that Make's
+    // webhook endpoint does not answer, silently dropping the request.
+    const body = new URLSearchParams();
+    body.set('marketer', marketerName);
+    body.set('time', new Date(at).toISOString());
+    fetch(MAKE_WEBHOOK_URL, {
+      method: 'POST',
+      body: body
+    }).catch(() => {
+      // Silent fail: the closing is still saved locally even if the email alert didn't fire.
+    });
+  }
+
+  function removeCheck(marketerId, checkId) {
+    const next = marketers.map(m =>
+      m.id === marketerId ? { ...m, checks: m.checks.filter(c => c.id !== checkId) } : m
+    );
+    save(next);
+  }
+
+  function showToast(check) {
+    const el = document.getElementById('toast');
+    el.innerHTML = `🔔 <div><b>${escapeHtml(check.marketer)}</b> סגר/ה עסקה — ${timeAgo(check.at)}</div>`;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 4000);
+  }
+
+  function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function render() {
+    // header subline
+    const todayStr = new Date().toDateString();
+    const totalToday = marketers.reduce((sum, m) =>
+      sum + m.checks.filter(c => new Date(c.at).toDateString() === todayStr).length, 0);
+    document.getElementById('subLine').textContent = `לוח סגירות — ${totalToday} עסקאות היום`;
+
+    // table
+    const table = document.getElementById('table');
+    if (marketers.length === 0) {
+      table.innerHTML = `<div class="empty">אין עדיין משווקים ברשימה. הוסף/י למעלה.</div>`;
+    } else {
+      table.innerHTML = marketers.map(m => `
+        <div class="row-card">
+          <div class="row-head">
+            <div class="row-name">${escapeHtml(m.name)}</div>
+            <button class="remove-marketer" title="הסרת משווק" onclick="removeMarketer('${m.id}')">✕</button>
+          </div>
+          <div class="checks-row">
+            ${m.checks.slice().sort((a,b)=>a.at-b.at).map((c,i) => `
+              <button class="checked-box" title="עסקה ${i+1} · ${timeAgo(c.at)} · לחיצה לביטול" onclick="removeCheck('${m.id}','${c.id}')">✓</button>
+            `).join('')}
+            <button class="add-box" title="סימון סגירת עסקה" onclick="addCheck('${m.id}')" style="color:var(--brass); font-weight:700;">+</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // feed
+    const feed = marketers
+      .flatMap(m => m.checks.map(c => ({ ...c, marketer: m.name })))
+      .sort((a,b) => b.at - a.at)
+      .slice(0, 8);
+    const feedWrap = document.getElementById('feedWrap');
+    if (feed.length > 0) {
+      feedWrap.innerHTML = `
+        <div class="feed-title">פעילות אחרונה</div>
+        <div class="feed-list">
+          ${feed.map(c => `
+            <div class="feed-row">
+              <div class="feed-dot"></div>
+              <div class="feed-text"><b>${escapeHtml(c.marketer)}</b> סגר/ה עסקה</div>
+              <div class="feed-time">${timeAgo(c.at)}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    } else {
+      feedWrap.innerHTML = '';
+    }
+  }
+
+  // init
+  marketers = load();
+  knownCheckIds = new Set(marketers.flatMap(m => m.checks.map(c => c.id)));
+  render();
+
+  // refresh relative timestamps periodically
+  setInterval(render, 15000);
+
+  // sync across tabs in the same browser
+  window.addEventListener('storage', (e) => {
+    if (e.key !== STORAGE_KEY) return;
+    const list = load();
+    if (!firstLoad) {
+      const allChecks = list.flatMap(m => m.checks.map(c => ({...c, marketer: m.name})));
+      const fresh = allChecks.filter(c => !knownCheckIds.has(c.id));
+      if (fresh.length > 0) showToast(fresh[fresh.length - 1]);
+    }
+    knownCheckIds = new Set(list.flatMap(m => m.checks.map(c => c.id)));
+    firstLoad = false;
+    marketers = list;
+    render();
+  });
+
+  document.getElementById('nameInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') addMarketer();
+  });
+</script>
+</body>
+</html>
